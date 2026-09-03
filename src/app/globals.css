@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #d4a0a0;
+  --color-primary-light: #f5d5d8;
+  --color-primary-dark: #b87d7d;
+  --color-gold: #b8976a;
+  --color-gold-light: #c4a97d;
+  --color-cream: #faf5f0;
+  --color-text: #333333;
+}
+
+@theme {
+  --color-primary: var(--color-primary);
+  --color-primary-light: var(--color-primary-light);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-gold: var(--color-gold);
+  --color-gold-light: var(--color-gold-light);
+  --color-cream: var(--color-cream);
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-text);
+}
+
+/* Global cursor pointer for all interactive elements */
+a, button, [role="button"], input[type="submit"], input[type="button"],
+input[type="checkbox"], input[type="radio"], select, label[for],
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better selection color */
+::selection {
+  background-color: #f5d5d8;
+  color: #333;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #faf5f0;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4a0a0;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b87d7d;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.7s ease-out;
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(212, 160, 160, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(212, 160, 160, 0.6); }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Decorative gradient text */
+.text-gradient {
+  background: linear-gradient(135deg, #d4a0a0, #b8976a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
