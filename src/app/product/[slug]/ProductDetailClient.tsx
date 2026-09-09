@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Star, ShoppingBag, Truck, ShieldCheck, Minus, Plus } from 'lucide-react'
 import { useCartStore } from '@/lib/store'
 import { formatPrice, getDiscountPercentage } from '@/lib/utils'
+import { FREE_SHIPPING_THRESHOLD } from '@/lib/constants'
 import type { Product } from '@/lib/types'
 import toast from 'react-hot-toast'
 
@@ -159,7 +160,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           {/* Trust Info */}
           <div className="border-t pt-6 space-y-3">
             <div className="flex items-center gap-3 text-sm text-gray-600">
-              <Truck size={18} className="text-[#b8976a]" /> Free delivery on orders above Rs.3,000
+              <Truck size={18} className="text-[#b8976a]" /> Free delivery on orders above Rs.{FREE_SHIPPING_THRESHOLD.toLocaleString('en-PK')}
             </div>
             <div className="flex items-center gap-3 text-sm text-gray-600">
               <ShieldCheck size={18} className="text-[#b8976a]" /> Cash on Delivery available

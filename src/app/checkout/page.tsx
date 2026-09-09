@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { CheckCircle } from 'lucide-react'
 import { useCartStore } from '@/lib/store'
 import { formatPrice, generateOrderNumber } from '@/lib/utils'
+import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from '@/lib/constants'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
@@ -47,7 +48,7 @@ export default function CheckoutPage() {
   }
 
   const subtotal = total()
-  const shippingFee = subtotal >= 3000 ? 0 : 200
+  const shippingFee = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
   const grandTotal = subtotal + shippingFee
 
   const handleSubmit = async (e: React.FormEvent) => {

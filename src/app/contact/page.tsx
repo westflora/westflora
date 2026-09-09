@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Phone, Mail, MapPin, MessageCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { CONTACT_PHONE, WHATSAPP_LINK } from '@/lib/constants'
 import toast from 'react-hot-toast'
 
 export default function ContactPage() {
@@ -51,8 +52,8 @@ export default function ContactPage() {
           </div>
 
           <div className="space-y-4">
-            <a href="tel:03001234567" className="flex items-center gap-3 text-gray-700 hover:text-[#d4a0a0]">
-              <Phone size={20} className="text-[#b8976a]" /> 0300-1234567
+            <a href={`tel:${CONTACT_PHONE}`} className="flex items-center gap-3 text-gray-700 hover:text-[#d4a0a0]">
+              <Phone size={20} className="text-[#b8976a]" /> {CONTACT_PHONE}
             </a>
             <a href="mailto:info@westflora.pk" className="flex items-center gap-3 text-gray-700 hover:text-[#d4a0a0]">
               <Mail size={20} className="text-[#b8976a]" /> info@westflora.pk
@@ -63,12 +64,12 @@ export default function ContactPage() {
           </div>
 
           <a
-            href="https://wa.me/923001234567"
+            href={WHATSAPP_LINK}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-green-500 text-white px-6 py-3 rounded-full font-medium hover:bg-green-600 transition-colors"
           >
-            <MessageCircle size={20} /> Chat on WhatsApp
+            <MessageCircle size={20} /> WhatsApp {CONTACT_PHONE}
           </a>
 
           <div className="bg-white rounded-xl p-6">

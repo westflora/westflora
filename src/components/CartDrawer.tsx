@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
 import { useCartStore } from '@/lib/store'
 import { formatPrice } from '@/lib/utils'
+import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from '@/lib/constants'
 
 export default function CartDrawer() {
   const [isOpen, setIsOpen] = useState(false)
@@ -38,7 +39,7 @@ export default function CartDrawer() {
   }, [isOpen])
 
   const subtotal = total()
-  const shippingFee = subtotal >= 3000 ? 0 : 200
+  const shippingFee = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
   const grandTotal = subtotal + shippingFee
 
   return (

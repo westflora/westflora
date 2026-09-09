@@ -7,6 +7,8 @@ import { formatPrice } from '@/lib/utils'
 import Image from 'next/image'
 import toast from 'react-hot-toast'
 
+import { CATEGORY_NAMES } from '@/lib/constants'
+
 interface ProductForm {
   name: string; slug: string; description: string; price: string; original_price: string;
   category: string; sizes: string; colors: string; images: string[]; stock: string;
@@ -15,11 +17,11 @@ interface ProductForm {
 
 const emptyForm: ProductForm = {
   name: '', slug: '', description: '', price: '', original_price: '',
-  category: 'Abayas', sizes: 'S,M,L,XL', colors: '', images: [], stock: '0',
+  category: 'Tops & Shirts', sizes: 'S,M,L', colors: '', images: [], stock: '0',
   featured: false, is_new: false, is_sale: false,
 }
 
-const categories = ['Abayas', 'Hijabs', 'Modest Dresses', 'Kurtis', 'Co-ord Sets', 'Accessories']
+const categories = [...CATEGORY_NAMES]
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([])

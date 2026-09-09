@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
 import { useCartStore } from '@/lib/store'
 import { formatPrice } from '@/lib/utils'
+import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from '@/lib/constants'
 
 export default function CartPage() {
   const [mounted, setMounted] = useState(false)
@@ -29,7 +30,7 @@ export default function CartPage() {
   }
 
   const subtotal = total()
-  const shippingFee = subtotal >= 3000 ? 0 : 200
+  const shippingFee = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
   const grandTotal = subtotal + shippingFee
 
   return (
@@ -73,7 +74,7 @@ export default function CartPage() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span>{formatPrice(subtotal)}</span></div>
             <div className="flex justify-between"><span className="text-gray-500">Shipping</span><span>{shippingFee === 0 ? 'FREE' : formatPrice(shippingFee)}</span></div>
-            {shippingFee > 0 && <p className="text-xs text-[#b8976a]">Add {formatPrice(3000 - subtotal)} more for free delivery</p>}
+            {shippingFee > 0 && <p className="text-xs text-[#b8976a]">Add {formatPrice(FREE_SHIPPING_THRESHOLD - subtotal)} more for free delivery</p>}
             <div className="border-t pt-2 flex justify-between font-semibold text-base">
               <span>Total</span><span className="text-[#d4a0a0]">{formatPrice(grandTotal)}</span>
             </div>

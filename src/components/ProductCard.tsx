@@ -9,7 +9,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <Link href={`/product/${product.slug}`} className="group block">
-      <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-gray-100 shadow-sm group-hover:shadow-xl transition-all duration-500">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-[1.35rem] bg-[#f7f0ea] ring-1 ring-[#f0e4e0] shadow-sm group-hover:shadow-[0_20px_50px_rgba(138,58,58,0.14)] group-hover:ring-[#e8b4b8]/60 transition-all duration-500">
         <Image
           src={product.images[0] || '/images/placeholder.jpg'}
           alt={product.name}
@@ -18,10 +18,8 @@ export default function ProductCard({ product }: { product: Product }) {
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
 
-        {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#2a1818]/35 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-        {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
           {product.is_new && (
             <span className="bg-[#b8976a] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-md">
@@ -29,26 +27,24 @@ export default function ProductCard({ product }: { product: Product }) {
             </span>
           )}
           {hasDiscount && (
-            <span className="bg-[#d4a0a0] text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-md">
+            <span className="bg-[#8a3a3a] text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-md">
               -{getDiscountPercentage(product.price, product.original_price!)}% OFF
             </span>
           )}
         </div>
 
-        {/* Quick action */}
         <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-          <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg hover:bg-[#d4a0a0] hover:text-white transition-colors">
+          <div className="bg-white/95 backdrop-blur-sm rounded-full p-3 shadow-lg text-[#5c2a2a]">
             <ShoppingBag size={18} />
           </div>
         </div>
       </div>
 
       <div className="mt-4 space-y-1.5 px-1">
-        <h3 className="font-semibold text-gray-800 group-hover:text-[#d4a0a0] transition-colors text-sm lg:text-base">
+        <h3 className="font-semibold text-[#2d2d2d] group-hover:text-[#8a3a3a] transition-colors text-sm lg:text-base">
           {product.name}
         </h3>
 
-        {/* Rating */}
         {product.review_count > 0 && (
           <div className="flex items-center gap-1.5">
             <div className="flex">
@@ -64,9 +60,8 @@ export default function ProductCard({ product }: { product: Product }) {
           </div>
         )}
 
-        {/* Price */}
         <div className="flex items-center gap-2">
-          <span className="font-bold text-[#d4a0a0] text-base lg:text-lg">{formatPrice(product.price)}</span>
+          <span className="font-bold text-[#8a3a3a] text-base lg:text-lg">{formatPrice(product.price)}</span>
           {hasDiscount && (
             <span className="text-gray-400 line-through text-xs lg:text-sm">{formatPrice(product.original_price!)}</span>
           )}
