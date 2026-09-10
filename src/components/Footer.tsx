@@ -96,8 +96,21 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-[#e8b4b8]/30 py-5 text-center text-gray-400 text-sm">
-        © 2026 <span className="text-[#d4a0a0] font-medium">West Flora</span>. All Rights Reserved.
+      <div className="border-t border-[#e8b4b8]/30 py-5 text-center text-gray-400 text-sm space-y-1">
+        <p>
+          © 2026 <span className="text-[#d4a0a0] font-medium">West Flora</span>. All Rights Reserved.
+        </p>
+        <p>
+          Made by{' '}
+          <a
+            href="https://www.ascendedly.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#8a3a3a] font-medium hover:text-[#d4a0a0] transition-colors"
+          >
+            Ascendedly
+          </a>
+        </p>
       </div>
     </footer>
   )
