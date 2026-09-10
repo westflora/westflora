@@ -8,11 +8,22 @@ import toast from 'react-hot-toast'
 
 const statuses = ['all', 'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled']
 
+type OrderItem = {
+  id: string
+  product_id: string | null
+  quantity: number
+  product_name: string
+  size: string
+  color: string
+  price: number
+}
+
 export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
-  const [orderItems, setOrderItems] = useState<any[]>([])
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([])
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
 
   const supabase = createClient()
 
@@ -28,20 +39,100 @@ export default function OrdersPage() {
   const viewOrder = async (order: any) => {
     setSelectedOrder(order)
     const { data } = await supabase.from('order_items').select('*').eq('order_id', order.id)
-    setOrderItems(data || [])
+    setOrderItems((data as OrderItem[]) || [])
   }
 
-  const updateStatus = async (orderId: string, newStatus: string) => {
-    const { error } = await supabase.from('orders').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', orderId)
-    if (error) toast.error(error.message)
-    else { toast.success(`Status updated to ${newStatus}`); fetchOrders(); if (selectedOrder?.id === orderId) setSelectedOrder({ ...selectedOrder, status: newStatus }) }
+  const getOrderItems = async (orderId: string): Promise<OrderItem[]> => {
+    if (selectedOrder?.id === orderId && orderItems.length > 0) return orderItems
+    const { data } = await supabase.from('order_items').select('*').eq('order_id', orderId)
+    return (data as OrderItem[]) || []
+  }
+
+  const adjustStockForOrder = async (items: OrderItem[], direction: 1 | -1) => {
+    const qtyByProduct = new Map<string, number>()
+
+    for (const item of items) {
+      if (!item.product_id) continue
+      qtyByProduct.set(
+        item.product_id,
+        (qtyByProduct.get(item.product_id) || 0) + Number(item.quantity || 0)
+      )
+    }
+
+    for (const [productId, qty] of qtyByProduct) {
+      if (qty <= 0) continue
+
+      const { data: product, error: fetchError } = await supabase
+        .from('products')
+        .select('stock')
+        .eq('id', productId)
+        .single()
+
+      if (fetchError || !product) {
+        console.error('Stock fetch failed', productId, fetchError)
+        continue
+      }
+
+      const nextStock = Math.max(0, Number(product.stock || 0) + direction * qty)
+      const { error: updateError } = await supabase
+        .from('products')
+        .update({ stock: nextStock, updated_at: new Date().toISOString() })
+        .eq('id', productId)
+
+      if (updateError) {
+        console.error('Stock update failed', productId, updateError)
+        throw updateError
+      }
+    }
+  }
+
+  const updateStatus = async (orderId: string, previousStatus: string, newStatus: string) => {
+    if (previousStatus === newStatus) return
+
+    setUpdatingId(orderId)
+    try {
+      const crossingIntoDelivered = newStatus === 'delivered' && previousStatus !== 'delivered'
+      const crossingOutOfDelivered = previousStatus === 'delivered' && newStatus !== 'delivered'
+
+      let items: OrderItem[] = []
+      if (crossingIntoDelivered || crossingOutOfDelivered) {
+        items = await getOrderItems(orderId)
+      }
+
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', orderId)
+
+      if (error) throw error
+
+      if (crossingIntoDelivered) {
+        await adjustStockForOrder(items, -1)
+      } else if (crossingOutOfDelivered) {
+        await adjustStockForOrder(items, 1)
+      }
+
+      toast.success(
+        crossingIntoDelivered
+          ? 'Marked delivered — stock updated'
+          : `Status updated to ${newStatus}`
+      )
+      await fetchOrders()
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder({ ...selectedOrder, status: newStatus })
+      }
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to update order status')
+      await fetchOrders()
+    } finally {
+      setUpdatingId(null)
+    }
   }
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Orders</h1>
 
-      {/* Status Tabs */}
       <div className="flex flex-wrap gap-2 mb-6">
         {statuses.map((s) => (
           <button key={s} onClick={() => setFilter(s)}
@@ -78,8 +169,12 @@ export default function OrdersPage() {
                 <td className="px-5 py-3">{order.city}</td>
                 <td className="px-5 py-3">{formatPrice(order.total)}</td>
                 <td className="px-5 py-3">
-                  <select value={order.status} onChange={(e) => updateStatus(order.id, e.target.value)}
-                    className="border rounded px-2 py-1 text-xs focus:outline-none focus:border-[#d4a0a0]">
+                  <select
+                    value={order.status}
+                    disabled={updatingId === order.id}
+                    onChange={(e) => updateStatus(order.id, order.status, e.target.value)}
+                    className="border rounded px-2 py-1 text-xs focus:outline-none focus:border-[#d4a0a0] disabled:opacity-50"
+                  >
                     {statuses.filter(s => s !== 'all').map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </td>
@@ -93,7 +188,6 @@ export default function OrdersPage() {
         </table>
       </div>
 
-      {/* Order Detail Modal */}
       {selectedOrder && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 pt-20 overflow-y-auto">
           <div className="bg-white rounded-2xl w-full max-w-lg p-6 relative">
@@ -112,7 +206,7 @@ export default function OrdersPage() {
 
             <h3 className="font-semibold mb-3">Items</h3>
             <div className="space-y-2 mb-6">
-              {orderItems.map((item: any) => (
+              {orderItems.map((item) => (
                 <div key={item.id} className="flex justify-between text-sm border-b pb-2">
                   <div>
                     <p className="font-medium">{item.product_name}</p>

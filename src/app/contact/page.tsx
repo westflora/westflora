@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Phone, Mail, MapPin, MessageCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import SocialLinks from '@/components/SocialLinks'
 import { CONTACT_PHONE, WHATSAPP_LINK } from '@/lib/constants'
 import toast from 'react-hot-toast'
 
@@ -71,6 +72,8 @@ export default function ContactPage() {
           >
             <MessageCircle size={20} /> WhatsApp {CONTACT_PHONE}
           </a>
+
+          <SocialLinks showLabel />
 
           <div className="bg-white rounded-xl p-6">
             <p className="text-sm text-gray-500 mb-1">Business Hours</p>

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Plus, Pencil, Trash2, X, Upload } from 'lucide-react'
+import { Plus, Pencil, Trash2, X, Upload, AlertTriangle } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import Image from 'next/image'
 import toast from 'react-hot-toast'
@@ -132,13 +132,65 @@ export default function ProductsPage() {
     else { toast.success('Product deleted'); fetchProducts() }
   }
 
+  const handleDeleteAll = async () => {
+    if (products.length === 0) {
+      toast.error('No products to delete')
+      return
+    }
+
+    const confirmed = confirm(
+      `Delete ALL ${products.length} products?\n\nThis cannot be undone.`
+    )
+    if (!confirmed) return
+
+    const doubleCheck = confirm(
+      'Final confirmation: permanently delete every product from the store?'
+    )
+    if (!doubleCheck) return
+
+    setLoading(true)
+    try {
+      // Detach order history so product rows can be removed
+      await supabase
+        .from('order_items')
+        .update({ product_id: null })
+        .not('product_id', 'is', null)
+
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .not('id', 'is', null)
+
+      if (error) throw error
+
+      toast.success('All products deleted')
+      setProducts([])
+    } catch (err: any) {
+      toast.error(err.message || 'Could not delete all products')
+      fetchProducts()
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
         <h1 className="text-2xl font-bold">Products</h1>
-        <button onClick={openAdd} className="bg-[#d4a0a0] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#b87d7d] text-sm">
-          <Plus size={18} /> Add Product
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={handleDeleteAll}
+            disabled={loading || products.length === 0}
+            className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-red-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <AlertTriangle size={18} />
+            Delete All Products
+          </button>
+          <button onClick={openAdd} className="bg-[#d4a0a0] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#b87d7d] text-sm">
+            <Plus size={18} /> Add Product
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm overflow-x-auto">

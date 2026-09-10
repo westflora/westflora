@@ -1,7 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Phone, Mail, MessageCircle } from 'lucide-react'
-import { CATEGORIES, CONTACT_PHONE, FREE_SHIPPING_THRESHOLD, WHATSAPP_LINK } from '@/lib/constants'
+import { Phone, Mail } from 'lucide-react'
+import SocialLinks from '@/components/SocialLinks'
+import {
+  CATEGORIES,
+  CONTACT_PHONE,
+  FREE_SHIPPING_THRESHOLD,
+} from '@/lib/constants'
 
 export default function Footer() {
   return (
@@ -21,23 +26,15 @@ export default function Footer() {
           <p className="text-gray-400 text-sm lg:text-base mb-10 max-w-lg mx-auto leading-relaxed">
             Whether you need styling advice or have questions about our collection, our team is here to help you every step of the way.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Link
               href="/contact"
               className="group inline-flex items-center gap-2 bg-[#d4a0a0] text-white px-10 py-4 rounded-full text-sm font-semibold hover:bg-[#b87d7d] transition-all duration-300 shadow-lg hover:-translate-y-0.5"
             >
               Contact Us
             </Link>
-            <a
-              href={WHATSAPP_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 border border-white/20 text-white px-10 py-4 rounded-full text-sm font-semibold hover:bg-white/10 transition-all duration-300 hover:-translate-y-0.5"
-            >
-              <MessageCircle size={16} />
-              WhatsApp
-            </a>
           </div>
+          <SocialLinks variant="dark" className="mt-8 justify-center" />
         </div>
       </div>
 
@@ -50,9 +47,10 @@ export default function Footer() {
             height={120}
             className="h-24 w-24 object-contain rounded-full bg-white shadow-md p-1 mb-4"
           />
-          <p className="text-gray-600 text-sm leading-relaxed">
+          <p className="text-gray-600 text-sm leading-relaxed mb-5">
             Elevate Your Closet Story.<br />Premium modest fashion for the modern woman.
           </p>
+          <SocialLinks iconClassName="h-4 w-4" className="gap-2.5" />
         </div>
 
         <div>
@@ -93,14 +91,6 @@ export default function Footer() {
                 <Mail size={14} className="text-[#d4a0a0]" />
               </div>
               info@westflora.pk
-            </a>
-            <a
-              href={WHATSAPP_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-green-500 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-green-600 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 w-fit"
-            >
-              <MessageCircle size={16} /> WhatsApp {CONTACT_PHONE}
             </a>
           </div>
         </div>
