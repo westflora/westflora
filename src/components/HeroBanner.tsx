@@ -33,7 +33,7 @@ export default function HeroBanner() {
             <span className="block mt-1 text-[#f5d5d8]">Closet Story</span>
           </h1>
           <p className="text-white/85 text-base lg:text-lg leading-relaxed mb-10 max-w-xl mx-auto animate-reveal-up stagger-2">
-            Soft silhouettes and timeless modest pieces — curated for everyday elegance.
+            The outfit you save on Pinterest but can&apos;t find easily in Pakistan.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center animate-reveal-up stagger-3">
             <Link
