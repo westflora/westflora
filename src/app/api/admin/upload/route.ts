@@ -8,12 +8,28 @@ export const runtime = 'nodejs'
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/jpg']
 const MAX_SIZE = 8 * 1024 * 1024
 
-function isImageFile(item: FormDataEntryValue): item is File {
-  return typeof File !== 'undefined' && item instanceof File && item.size > 0
+type UploadItem = {
+  blob: Blob
+  name: string
+  type: string
 }
 
-function isImageBlob(item: FormDataEntryValue): item is Blob & { name?: string } {
-  return typeof Blob !== 'undefined' && item instanceof Blob && item.size > 0 && !(item instanceof File)
+function toUploadItems(entries: FormDataEntryValue[]): UploadItem[] {
+  const items: UploadItem[] = []
+
+  for (const [index, entry] of entries.entries()) {
+    if (typeof entry === 'string') continue
+    if (!(entry instanceof Blob) || entry.size <= 0) continue
+
+    const file = entry as Blob & { name?: string; type: string }
+    items.push({
+      blob: entry,
+      name: file.name || `image-${index}.jpg`,
+      type: file.type || '',
+    })
+  }
+
+  return items
 }
 
 export async function POST(request: NextRequest) {
@@ -24,12 +40,9 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData()
-    const entries = formData.getAll('files')
+    const items = toUploadItems(formData.getAll('files'))
 
-    const files = entries.filter(isImageFile)
-    const blobs = entries.filter(isImageBlob)
-
-    if (files.length === 0 && blobs.length === 0) {
+    if (items.length === 0) {
       return NextResponse.json({ error: 'No images selected' }, { status: 400 })
     }
 
@@ -37,16 +50,8 @@ export async function POST(request: NextRequest) {
     await mkdir(uploadDir, { recursive: true })
 
     const urls: string[] = []
-    const allItems: Array<{ blob: Blob; name: string; type: string }> = [
-      ...files.map((file) => ({ blob: file, name: file.name, type: file.type })),
-      ...blobs.map((blob, i) => ({
-        blob,
-        name: blob.name || `image-${i}.jpg`,
-        type: blob.type,
-      })),
-    ]
 
-    for (const item of allItems) {
+    for (const item of items) {
       const type = item.type || guessTypeFromName(item.name)
       if (!ALLOWED_TYPES.includes(type) && !isAllowedByExtension(item.name)) {
         return NextResponse.json(
@@ -66,12 +71,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ urls })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Upload failed:', err)
-    return NextResponse.json(
-      { error: err?.message || 'Upload failed. Please try again.' },
-      { status: 500 }
-    )
+    const message = err instanceof Error ? err.message : 'Upload failed. Please try again.'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
