@@ -75,10 +75,25 @@ export default function ProductsPage() {
     if (files.length === 0) return []
     const data = new FormData()
     files.forEach((file) => data.append('files', file))
-    const res = await fetch('/api/admin/upload', { method: 'POST', body: data })
-    const json = await res.json()
+    const res = await fetch('/api/admin/upload', {
+      method: 'POST',
+      body: data,
+      credentials: 'include',
+    })
+    const text = await res.text()
+    let json: { error?: string; urls?: string[] } = {}
+    try {
+      json = text ? JSON.parse(text) : {}
+    } catch {
+      throw new Error(
+        res.status === 401
+          ? 'Session expired. Please log in again.'
+          : `Image upload failed (${res.status || 'network error'}). Try a smaller JPG/PNG.`
+      )
+    }
     if (!res.ok) throw new Error(json.error || 'Failed to upload images')
-    return json.urls as string[]
+    if (!json.urls?.length) throw new Error('Upload succeeded but no image URL returned')
+    return json.urls
   }
 
   const handleSave = async () => {
