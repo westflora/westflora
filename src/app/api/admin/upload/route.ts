@@ -1,10 +1,10 @@
-import { mkdir, writeFile } from 'fs/promises'
-import path from 'path'
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 import { ADMIN_COOKIE, isValidAdminToken } from '@/lib/admin'
 
 export const runtime = 'nodejs'
 
+const BUCKET = 'product-images'
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/jpg']
 const MAX_SIZE = 8 * 1024 * 1024
 
@@ -32,6 +32,15 @@ function toUploadItems(entries: FormDataEntryValue[]): UploadItem[] {
   return items
 }
 
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) {
+    throw new Error('Supabase is not configured')
+  }
+  return createClient(url, key)
+}
+
 export async function POST(request: NextRequest) {
   try {
     const token = request.cookies.get(ADMIN_COOKIE)?.value
@@ -46,9 +55,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No images selected' }, { status: 400 })
     }
 
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'products')
-    await mkdir(uploadDir, { recursive: true })
-
+    const supabase = getSupabase()
     const urls: string[] = []
 
     for (const item of items) {
@@ -65,9 +72,29 @@ export async function POST(request: NextRequest) {
 
       const ext = item.name.split('.').pop()?.toLowerCase() || extensionFromType(type)
       const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+      const path = `products/${filename}`
       const buffer = Buffer.from(await item.blob.arrayBuffer())
-      await writeFile(path.join(uploadDir, filename), buffer)
-      urls.push(`/uploads/products/${filename}`)
+
+      const { error } = await supabase.storage.from(BUCKET).upload(path, buffer, {
+        contentType: type || 'image/jpeg',
+        upsert: false,
+      })
+
+      if (error) {
+        console.error('Storage upload failed:', error)
+        return NextResponse.json(
+          {
+            error:
+              error.message.includes('Bucket not found') || error.message.includes('not found')
+                ? 'Storage bucket missing. Run supabase-storage.sql in your Supabase project.'
+                : error.message,
+          },
+          { status: 500 }
+        )
+      }
+
+      const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
+      urls.push(data.publicUrl)
     }
 
     return NextResponse.json({ urls })
